@@ -1,0 +1,475 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ENUMS
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+enum AuthProvider {
+  APPLE
+  GOOGLE
+}
+
+enum AppEnvironment {
+  SANDBOX
+  PRODUCTION
+}
+
+enum SubscriptionProvider {
+  APP_STORE
+  REVENUECAT
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  GRACE_PERIOD
+  BILLING_RETRY
+  EXPIRED
+  REVOKED
+}
+
+enum BudgetLevel {
+  BUDGET
+  MODERATE
+  LUXURY
+}
+
+enum TravelPace {
+  RELAXED
+  BALANCED
+  PACKED
+}
+
+enum TripStatus {
+  GENERATING
+  READY
+  FAILED
+}
+
+enum TripVisibility {
+  PRIVATE
+  UNLISTED
+  PUBLIC
+}
+
+enum TripSource {
+  AI
+  MANUAL
+}
+
+enum TripMemberRole {
+  VIEWER
+  EDITOR
+}
+
+enum ActivityType {
+  SIGHTSEEING
+  FOOD
+  ACTIVITY
+  TRANSPORT
+  LODGING
+  SHOPPING
+  FREE_TIME
+  OTHER
+}
+
+enum GenerationStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+// USERS & AUTH
+
+model User {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  email           String    @unique // always stored lowercase (CHECK constraint in SQL file)
+  name            String?
+  avatarUrl       String?   @map("avatar_url")
+  role            Role      @default(USER)
+  passwordHash    String?   @map("password_hash")
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz(6)
+
+  // Cache of entitlement: written ONLY by the subscription webhook handler.
+  // Source of truth is the Subscription table.
+  plan          Plan      @default(FREE)
+  planExpiresAt DateTime? @map("plan_expires_at") @db.Timestamptz(6)
+
+  homeCity    String? @map("home_city")
+  countryCode String? @map("country_code") @db.Char(2)
+  locale      String  @default("en")
+  timezone    String  @default("Asia/Kolkata")
+  currency    String  @default("INR") @db.Char(3)
+
+  isActive    Boolean   @default(true) @map("is_active")
+  lastLoginAt DateTime? @map("last_login_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  preferences     UserPreference?
+  authIdentities  AuthIdentity[]
+  refreshTokens   RefreshToken[]
+  deviceTokens    DeviceToken[]
+  subscriptions   Subscription[]
+  ownedTrips      Trip[]         @relation("TripOwner")
+  savedTrips      SavedTrip[]
+  tripMemberships TripMember[]
+  aiGenerations   AiGeneration[]
+
+  @@map("users")
+}
+
+model UserPreference {
+  userId      String      @id @map("user_id") @db.Uuid
+  interests   String[]    @default([])
+  dietary     String[]    @default([])
+  budgetLevel BudgetLevel @default(MODERATE) @map("budget_level")
+  pace        TravelPace  @default(BALANCED)
+  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model AuthIdentity {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  userId         String       @map("user_id") @db.Uuid
+  provider       AuthProvider
+  providerUserId String       @map("provider_user_id")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("auth_identities")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  familyId   String    @map("family_id") @db.Uuid // one family per login; reuse of a revoked token revokes the family
+  tokenHash  String    @unique @map("token_hash")
+  deviceName String?   @map("device_name")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(6)
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(6)
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([familyId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model DeviceToken {
+  id          String         @id @default(uuid(7)) @db.Uuid
+  userId      String         @map("user_id") @db.Uuid
+  token       String         @unique // APNs device token
+  environment AppEnvironment @default(PRODUCTION) // sandbox and production APNs tokens differ
+  lastSeenAt  DateTime       @default(now()) @map("last_seen_at") @db.Timestamptz(6)
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("device_tokens")
+}
+
+// SUBSCRIPTIONS
+
+model Subscription {
+  id                     String               @id @default(uuid(7)) @db.Uuid
+  userId                 String?              @map("user_id") @db.Uuid // nullable: records can outlive the account
+  provider               SubscriptionProvider
+  environment            AppEnvironment       @default(PRODUCTION)
+  providerCustomerId     String?              @map("provider_customer_id")
+  providerSubscriptionId String?              @map("provider_subscription_id")
+  productId              String               @map("product_id")
+  status                 SubscriptionStatus
+  currentPeriodStart     DateTime?            @map("current_period_start") @db.Timestamptz(6)
+  currentPeriodEnd       DateTime?            @map("current_period_end") @db.Timestamptz(6)
+  autoRenewEnabled       Boolean?             @map("auto_renew_enabled")
+  createdAt              DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerSubscriptionId])
+  @@index([userId, status])
+  @@index([currentPeriodEnd])
+  @@map("subscriptions")
+}
+
+// Dedupes provider webhooks: insert first, skip processing if the unique key already exists.
+// Purge rows older than ~90 days with a scheduled job.
+model WebhookEvent {
+  id          String               @id @default(uuid(7)) @db.Uuid
+  provider    SubscriptionProvider
+  eventId     String               @map("event_id")
+  eventType   String               @map("event_type")
+  payload     Json
+  receivedAt  DateTime             @default(now()) @map("received_at") @db.Timestamptz(6)
+  processedAt DateTime?            @map("processed_at") @db.Timestamptz(6)
+
+  @@unique([provider, eventId])
+  @@index([receivedAt])
+  @@map("webhook_events")
+}
+
+// PLACES
+
+model Place {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  provider        String
+  providerPlaceId String    @map("provider_place_id")
+  name            String
+  address         String?
+  city            String?
+  countryCode     String?   @map("country_code") @db.Char(2)
+  latitude        Float
+  longitude       Float
+  category        String?
+  rating          Float?
+  photoUrl        String?   @map("photo_url")
+  metadata        Json?
+  refreshedAt     DateTime  @default(now()) @map("refreshed_at") @db.Timestamptz(6) // for provider cache-TTL rules
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  activities Activity[]
+
+  @@unique([provider, providerPlaceId])
+  @@index([latitude, longitude])
+  @@index([city, category])
+  @@map("places")
+}
+
+// TRIPS
+
+model Trip {
+  id           String  @id @default(uuid(7)) @db.Uuid
+  ownerId      String  @map("owner_id") @db.Uuid
+  forkedFromId String? @map("forked_from_id") @db.Uuid
+
+  title                  String
+  summary                String?
+  destination            String
+  destinationCountryCode String? @map("destination_country_code") @db.Char(2)
+  destinationLat         Float?  @map("destination_lat")
+  destinationLng         Float?  @map("destination_lng")
+  coverImageUrl          String? @map("cover_image_url")
+
+  startDate     DateTime?   @map("start_date") @db.Date
+  endDate       DateTime?   @map("end_date") @db.Date
+  durationDays  Int         @map("duration_days")
+  travelerCount Int         @default(1) @map("traveler_count")
+  budgetLevel   BudgetLevel @default(MODERATE) @map("budget_level")
+  pace          TravelPace  @default(BALANCED)
+  currency      String      @default("INR") @db.Char(3)
+  estimatedCost Decimal?    @map("estimated_cost") @db.Decimal(10, 2)
+  tags          String[]    @default([])
+
+  source     TripSource     @default(AI)
+  status     TripStatus     @default(GENERATING)
+  visibility TripVisibility @default(PRIVATE)
+  shareSlug  String?        @unique @map("share_slug")
+  saveCount  Int            @default(0) @map("save_count") // update in the same transaction as SavedTrip
+  revision   Int            @default(1) // optimistic concurrency: UPDATE ... WHERE revision = :seen
+
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner      User   @relation("TripOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  forkedFrom Trip?  @relation("TripForks", fields: [forkedFromId], references: [id], onDelete: SetNull)
+  forks      Trip[] @relation("TripForks")
+
+  days          TripDay[]
+  savedBy       SavedTrip[]
+  members       TripMember[]
+  revisions     TripRevision[]
+  messages      TripMessage[]
+  aiGenerations AiGeneration[]
+
+  @@index([ownerId, deletedAt, updatedAt(sort: Desc)])
+  @@index([visibility, createdAt(sort: Desc)])
+  @@index([visibility, saveCount(sort: Desc)])
+  @@index([destination])
+  @@index([forkedFromId])
+  @@index([tags], type: Gin)
+  @@map("trips")
+}
+
+model TripDay {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  tripId    String    @map("trip_id") @db.Uuid
+  dayNumber Int       @map("day_number")
+  date      DateTime? @db.Date
+  title     String?
+  summary   String?
+
+  trip       Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  activities Activity[]
+
+  @@unique([tripId, dayNumber])
+  @@map("trip_days")
+}
+
+model Activity {
+  id      String  @id @default(uuid(7)) @db.Uuid
+  dayId   String  @map("day_id") @db.Uuid
+  placeId String? @map("place_id") @db.Uuid
+
+  // Deliberately NOT unique: a unique constraint breaks swaps/reorders.
+  // Renumber a day's activities inside one transaction.
+  position Int
+
+  actType         ActivityType @default(SIGHTSEEING) @map("act_type")
+  title           String
+  description     String?
+  locationName    String?      @map("location_name") // fallback when no Place matched
+  startMinute     Int?         @map("start_minute") // minutes from midnight, local time
+  durationMinutes Int?         @map("duration_minutes")
+  estimatedCost   Decimal?     @map("estimated_cost") @db.Decimal(10, 2)
+  notes           String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  day   TripDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  place Place?  @relation(fields: [placeId], references: [id], onDelete: SetNull)
+
+  @@index([dayId, position])
+  @@index([placeId])
+  @@map("activities")
+}
+
+model SavedTrip {
+  userId    String   @map("user_id") @db.Uuid
+  tripId    String   @map("trip_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tripId])
+  @@index([tripId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("saved_trips")
+}
+
+model TripMember {
+  tripId    String         @map("trip_id") @db.Uuid
+  userId    String         @map("user_id") @db.Uuid
+  role      TripMemberRole @default(VIEWER)
+  createdAt DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([tripId, userId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("trip_members")
+}
+
+model TripRevision {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tripId       String   @map("trip_id") @db.Uuid
+  version      Int
+  snapshot     Json
+  generationId String?  @map("generation_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  trip       Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  generation AiGeneration? @relation(fields: [generationId], references: [id], onDelete: SetNull)
+
+  @@unique([tripId, version])
+  @@index([generationId])
+  @@map("trip_revisions")
+}
+
+// AI
+
+model TripMessage {
+  id           String      @id @default(uuid(7)) @db.Uuid
+  tripId       String      @map("trip_id") @db.Uuid
+  role         MessageRole
+  content      String
+  generationId String?     @map("generation_id") @db.Uuid
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  trip       Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  generation AiGeneration? @relation(fields: [generationId], references: [id], onDelete: SetNull)
+
+  @@index([tripId, createdAt])
+  @@index([generationId])
+  @@map("trip_messages")
+}
+
+model AiGeneration {
+  id     String  @id @default(uuid(7)) @db.Uuid
+  userId String  @map("user_id") @db.Uuid
+  tripId String? @map("trip_id") @db.Uuid
+
+  status    GenerationStatus @default(QUEUED)
+  input     Json
+  modelName String           @map("model_name")
+
+  // External provider's request id (not a DB relation)
+  providerRequestId String? @map("provider_request_id")
+
+  // Client-supplied key, unique per user, so retried requests don't create duplicate jobs
+  idempotencyKey String? @map("idempotency_key")
+
+  inputTokens  Int?     @map("input_tokens")
+  outputTokens Int?     @map("output_tokens")
+  costUsd      Decimal? @map("cost_usd") @db.Decimal(10, 6)
+  latencyMs    Int?     @map("latency_ms")
+
+  attemptCount   Int       @default(0) @map("attempt_count")
+  startedAt      DateTime? @map("started_at") @db.Timestamptz(6)
+  leaseExpiresAt DateTime? @map("lease_expires_at") @db.Timestamptz(6)
+  nextRetryAt    DateTime? @map("next_retry_at") @db.Timestamptz(6)
+
+  errorCode String? @map("error_code")
+  error     String?
+
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trip      Trip?          @relation(fields: [tripId], references: [id], onDelete: SetNull)
+  revisions TripRevision[]
+  messages  TripMessage[]
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([tripId])
+  @@index([status, nextRetryAt])
+  @@index([status, leaseExpiresAt])
+  @@map("ai_generations")
+}
