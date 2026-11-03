@@ -4,23 +4,23 @@
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/polaris-logo.png",
+    "icon": "./assets/polaris-icon.png",
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/polaris-logo.png"
+      "icon": "./assets/polaris-icon.png"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/polaris-logo.png",
-        "monochromeImage": "./assets/polaris-logo.png"
+        "foregroundImage": "./assets/polaris-adaptive-icon.png",
+        "monochromeImage": "./assets/polaris-monochrome-icon.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "server",
-      "favicon": "./assets/polaris-logo.png"
+      "favicon": "./assets/polaris-favicon.png"
     },
     "plugins": [
       "expo-router",
@@ -28,8 +28,8 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",
-          "image": "./assets/polaris-logo.png",
-          "imageWidth": 76
+          "image": "./assets/polaris-splash-icon.png",
+          "imageWidth": 160
         }
       ],
       "expo-font"
