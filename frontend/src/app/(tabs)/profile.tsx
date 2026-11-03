@@ -1,17 +1,28 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
+
+import { AppText } from "../../components/shared/AppText";
+import { Screen } from "../../components/shared/Screen";
+import { useTheme } from "../../theme/ThemeProvider";
 
 export default function ProfileScreen() {
+  const { theme } = useTheme();
+
   return (
-    <View style={styles.container}>
-      <Text>Profile Screen</Text>
-    </View>
+    <Screen
+      style={[
+        styles.container,
+        { gap: theme.spacing(2), padding: theme.spacing(6) },
+      ]}
+    >
+      <AppText variant="h2">Profile</AppText>
+      <AppText color="muted">Profile Screen</AppText>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-})
+});

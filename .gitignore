@@ -37,10 +37,11 @@ pnpm-debug.log*
 .AppleDouble
 .LSOverride
 
-# Editor and IDE
+# Editor, IDE, and AI tooling
 .idea/
-.vscode/*
-!.vscode/extensions.json
+.vscode/
+.claude/
+AGENTS.md
 
 # Temporary files
 *.tmp
