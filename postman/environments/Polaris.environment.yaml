@@ -1,0 +1,8 @@
+name: Polaris
+values:
+  - key: baseUrl
+    value: ''
+  - key: accessToken
+    value: ''
+  - key: refreshToken
+    value: ''

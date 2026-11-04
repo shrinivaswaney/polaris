@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import "dotenv/config";
 import { Router, type Request, type Response } from "express";
-import jwt from "jsonwebtoken";
 import { prisma } from "../db/db.js";
 import {
   LoginRequestSchema,
@@ -15,7 +14,8 @@ import {
   type SignupRequestDto,
   type SignupResponseDto,
 } from "../dto/auth/signup.dto.js";
-import { validate } from "./validate.js";
+import { validate } from "../middleware/validate.js";
+import { createSession } from "./session.router.js";
 
 const authRouter = Router();
 
@@ -46,27 +46,38 @@ authRouter.post(
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      // Persist user to the database
-      const newUser = await prisma.user.create({
-        data: {
-          name,
-          email,
-          passwordHash: hashedPassword,
-          role: "USER",
-          plan: "FREE",
-          isActive: true,
-        },
+      // Persist the user and generate a session using a clean transaction wrapper
+      const result = await prisma.$transaction(async (tx) => {
+        const newUser = await tx.user.create({
+          data: {
+            name,
+            email,
+            passwordHash: hashedPassword,
+            role: "USER",
+            plan: "FREE",
+            isActive: true,
+          },
+        });
+
+        // Generate JWT session token
+        const tokens = await createSession(
+          newUser.id,
+          newUser.email,
+          newUser.role,
+          tx,
+        );
+        return { user: newUser, tokens };
       });
 
-      // Generate JWT session token
-      const token = jwt.sign(
-        { userId: newUser.id, email: newUser.email, role: newUser.role },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN },
-      );
-
-      // Return sanitized output matching the Response DTO
-      res.status(201).json(toSignupResponseDto(newUser, token));
+      res
+        .status(201)
+        .json(
+          toSignupResponseDto(
+            result.user,
+            result.tokens.accessToken,
+            result.tokens.refreshToken,
+          ),
+        );
     } catch (error) {
       console.error("Error in /signup route:", error);
       res.status(500).json({ error: "Internal server error" });
@@ -105,22 +116,30 @@ authRouter.post(
         return;
       }
 
-      await prisma.user
-        .update({
+      const result = await prisma.$transaction(async (tx) => {
+        const updatedUser = await tx.user.update({
           where: { id: user.id },
           data: { lastLoginAt: new Date() },
-        })
-        .catch((err) =>
-          console.error("Failed to log activity timestamp:", err),
+        });
+
+        const tokens = await createSession(
+          updatedUser.id,
+          updatedUser.email,
+          updatedUser.role,
+          tx,
         );
+        return { user: updatedUser, tokens };
+      });
 
-      const token = jwt.sign(
-        { userId: user.id, email: user.email, role: user.role },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN },
-      );
-
-      res.status(200).json(toLoginResponseDto(user, token));
+      res
+        .status(200)
+        .json(
+          toLoginResponseDto(
+            result.user,
+            result.tokens.accessToken,
+            result.tokens.refreshToken,
+          ),
+        );
     } catch (error) {
       console.error("Error in /login route:", error);
       res.status(500).json({ error: "Internal server error" });

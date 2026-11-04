@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { UserSessionResponseSchema } from "./session.dto.js";
 
 // Define Zod schemas for request validation
 const LoginRequestSchema = z.object({
@@ -18,19 +19,9 @@ const LoginRequestSchema = z.object({
 
 // Define Zod schemas for response validation
 const LoginResponseSchema = z.object({
-  token: z.string(),
-  user: z.object({
-    id: z.uuid(),
-    name: z.string().nullable(),
-    email: z.email(),
-    role: z.enum(["USER", "ADMIN"]),
-    plan: z.enum(["FREE", "PRO"]),
-    locale: z.string(),
-    timezone: z.string(),
-    currency: z.string(),
-    isActive: z.boolean(),
-    createdAt: z.string(),
-  }),
+  accessToken: z.string(),
+  refreshToken: z.string(),
+  user: UserSessionResponseSchema,
 });
 
 // Define TypeScript types based on the Zod schemas
@@ -38,9 +29,14 @@ type LoginRequestDto = z.infer<typeof LoginRequestSchema>["body"];
 type LoginResponseDto = z.infer<typeof LoginResponseSchema>;
 
 // Function to convert user data and token into a LoginResponseDto
-function toLoginResponseDto(user: any, token: string): LoginResponseDto {
+function toLoginResponseDto(
+  user: any,
+  accessToken: string,
+  refreshToken: string,
+): LoginResponseDto {
   return LoginResponseSchema.parse({
-    token,
+    accessToken,
+    refreshToken,
     user: {
       id: user.id,
       name: user.name,

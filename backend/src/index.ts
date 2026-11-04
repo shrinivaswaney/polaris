@@ -2,12 +2,16 @@ import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import { prisma } from "./db/db.js";
-import authRouter from "./routes/auth.js";
+import authRouter from "./routes/auth.router.js";
+import sessionRouter from "./routes/session.router.js";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+
+app.use("/v1", authRouter);
+app.use("/v1", sessionRouter);
 
 // Liveness: is the process up?
 app.get("/health", (_req, res) => {
@@ -23,8 +27,6 @@ app.get("/health/db", async (_req, res) => {
     res.status(503).json({ status: "error", db: "down" });
   }
 });
-
-app.use("/v1", authRouter);
 
 app.use(
   (
