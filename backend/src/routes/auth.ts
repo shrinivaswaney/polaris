@@ -105,10 +105,14 @@ authRouter.post(
         return;
       }
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { lastLoginAt: new Date() },
-      });
+      await prisma.user
+        .update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() },
+        })
+        .catch((err) =>
+          console.error("Failed to log activity timestamp:", err),
+        );
 
       const token = jwt.sign(
         { userId: user.id, email: user.email, role: user.role },
