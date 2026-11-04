@@ -1,15 +1,14 @@
+import { AppText } from "@/components/shared/AppText";
+import { Screen } from "@/components/shared/Screen";
+import { useTheme } from "@/theme/ThemeProvider";
 import { StyleSheet } from "react-native";
-
-import { AppText } from "../components/shared/AppText";
-import { Screen } from "../components/shared/Screen";
-import { useTheme } from "../theme/ThemeProvider";
 
 export default function ProfileScreen() {
   const { theme } = useTheme();
 
   return (
     <Screen
-      title="Profile"
+      section="Profile"
       style={[
         styles.container,
         { gap: theme.spacing(2), padding: theme.spacing(6) },
