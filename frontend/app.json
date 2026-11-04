@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Polaris",
+    "slug": "Polaris",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/polaris-icon.png",
