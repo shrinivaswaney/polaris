@@ -12,13 +12,14 @@ import {
   type ViewStyle,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 import { useTheme } from "../../theme/ThemeProvider";
 import { AppText } from "./AppText";
 
 export type AppHeaderProps = {
   /** Small uppercase section marker shown on the right. */
   section?: string;
+  /** Nested page title. Replaces the wordmark with a back affordance and title. */
+  title?: string;
   /** Replace the wordmark with a back affordance. */
   showBack?: boolean;
   onBack?: () => void;
@@ -53,6 +54,7 @@ function withAlpha(color: string, opacity: number): string {
  */
 export function AppHeader({
   section,
+  title,
   showBack = false,
   onBack,
   left,
@@ -77,8 +79,25 @@ export function AppHeader({
 
     if (router.canGoBack()) {
       router.back();
+      return;
     }
+
+    // Deep links have no history, so return to the app's root tab.
+    router.replace("/(tabs)/explore");
   };
+
+  const withBack = showBack || Boolean(title);
+  const backButton = withBack ? (
+    <Pressable
+      accessibilityLabel="Go back"
+      accessibilityRole="button"
+      hitSlop={12}
+      onPress={handleBack}
+      style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+    >
+      <CaretLeftIcon color={theme.colors.text} size={22} weight="thin" />
+    </Pressable>
+  ) : null;
 
   const containerStyle: StyleProp<ViewStyle> = [
     styles.root,
@@ -109,23 +128,13 @@ export function AppHeader({
     >
       <View style={styles.slot}>
         {left ??
-          (showBack ? (
-            <Pressable
-              accessibilityLabel="Go back"
-              accessibilityRole="button"
-              hitSlop={12}
-              onPress={handleBack}
-              style={({ pressed }) => [
-                styles.back,
-                pressed && styles.pressed,
-              ]}
-            >
-              <CaretLeftIcon
-                color={theme.colors.text}
-                size={22}
-                weight="thin"
-              />
-            </Pressable>
+          (title ? (
+            <View style={styles.titleGroup}>
+              {backButton}
+              <AppText variant="quote">{title}</AppText>
+            </View>
+          ) : withBack ? (
+            backButton
           ) : (
             <View style={styles.brand}>
               <Image
@@ -173,6 +182,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 8,
+  },
+  titleGroup: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
   },
   logo: {
     height: 30,

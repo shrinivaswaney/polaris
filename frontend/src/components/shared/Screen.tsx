@@ -1,17 +1,13 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import {
-  StyleSheet,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
-
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { useTheme } from "../../theme/ThemeProvider";
 import { AppHeader } from "./AppHeader";
 
 export type ScreenProps = PropsWithChildren<{
   /** Small section marker rendered in the header. */
   section?: string;
+  /** Nested page title; renders a back button instead of the wordmark. */
+  title?: string;
   /** Show a back affordance in the header. */
   showBack?: boolean;
   onBack?: () => void;
@@ -28,6 +24,7 @@ export type ScreenProps = PropsWithChildren<{
 export function Screen({
   children,
   section,
+  title,
   showBack,
   onBack,
   headerLeft,
@@ -37,14 +34,10 @@ export function Screen({
   const { theme } = useTheme();
 
   return (
-    <View
-      style={[
-        styles.screen,
-        { backgroundColor: theme.colors.background },
-      ]}
-    >
+    <View style={[styles.screen, { backgroundColor: theme.colors.background }]}>
       <AppHeader
         section={section}
+        title={title}
         showBack={showBack}
         onBack={onBack}
         left={headerLeft}

@@ -1,22 +1,22 @@
 import { StyleSheet } from "react-native";
 
-import { AppText } from "../../components/shared/AppText";
-import { Screen } from "../../components/shared/Screen";
-import { useTheme } from "../../theme/ThemeProvider";
+import { AppText } from "../components/shared/AppText";
+import { Screen } from "../components/shared/Screen";
+import { useTheme } from "../theme/ThemeProvider";
 
-export default function ProfileScreen() {
+export default function SavedScreen() {
   const { theme } = useTheme();
 
   return (
     <Screen
-      section="Profile"
+      title="Your Saved Items"
       style={[
         styles.container,
         { gap: theme.spacing(2), padding: theme.spacing(6) },
       ]}
     >
-      <AppText variant="h2">Profile</AppText>
-      <AppText color="muted">Profile Screen</AppText>
+      <AppText variant="h2">Saved</AppText>
+      <AppText color="muted">Saved Screen</AppText>
     </Screen>
   );
 }

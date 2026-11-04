@@ -1,10 +1,8 @@
 import { Tabs } from "expo-router";
 import {
-  BookmarkSimpleIcon,
   CompassIcon,
   MagnifyingGlassIcon,
   SparkleIcon,
-  UserIcon,
 } from "phosphor-react-native";
 
 import { useTheme } from "../../theme/ThemeProvider";
@@ -58,32 +56,6 @@ export default function TabsLayout() {
           title: "Concierge",
           tabBarIcon: ({ focused, size }) => (
             <SparkleIcon
-              color={focused ? theme.colors.primary : theme.colors.muted}
-              size={size}
-              weight={focused ? "fill" : "regular"}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="saved"
-        options={{
-          title: "Saved",
-          tabBarIcon: ({ focused, size }) => (
-            <BookmarkSimpleIcon
-              color={focused ? theme.colors.primary : theme.colors.muted}
-              size={size}
-              weight={focused ? "fill" : "regular"}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ focused, size }) => (
-            <UserIcon
               color={focused ? theme.colors.primary : theme.colors.muted}
               size={size}
               weight={focused ? "fill" : "regular"}

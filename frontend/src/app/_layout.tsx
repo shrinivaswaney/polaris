@@ -31,9 +31,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider mode="dark">
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
+      <Stack screenOptions={{ headerShown: false }} />
       <ThemedStatusBar />
     </ThemeProvider>
   );
