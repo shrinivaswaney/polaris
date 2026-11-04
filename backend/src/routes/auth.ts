@@ -23,7 +23,7 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRES_IN = 3600; // 1 hour in seconds
 
 authRouter.post(
-  "/v1/signup",
+  "/signup",
   validate(SignupRequestSchema),
   async (
     req: Request<{}, {}, SignupRequestDto>,
@@ -75,7 +75,7 @@ authRouter.post(
 );
 
 authRouter.post(
-  "/v1/login",
+  "/login",
   validate(LoginRequestSchema),
   async (
     req: Request<{}, {}, LoginRequestDto>,
@@ -105,14 +105,10 @@ authRouter.post(
         return;
       }
 
-      await prisma.user
-        .update({
-          where: { id: user.id },
-          data: { lastLoginAt: new Date() },
-        })
-        .catch((err) =>
-          console.error("Failed to log activity timestamp:", err),
-        );
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      });
 
       const token = jwt.sign(
         { userId: user.id, email: user.email, role: user.role },
