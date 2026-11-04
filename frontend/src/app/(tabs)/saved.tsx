@@ -9,6 +9,7 @@ export default function SavedScreen() {
 
   return (
     <Screen
+      section="Saved"
       style={[
         styles.container,
         { gap: theme.spacing(2), padding: theme.spacing(6) },

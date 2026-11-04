@@ -9,6 +9,7 @@ export default function ConciergeScreen() {
 
   return (
     <Screen
+      section="Concierge"
       style={[
         styles.container,
         { gap: theme.spacing(2), padding: theme.spacing(6) },

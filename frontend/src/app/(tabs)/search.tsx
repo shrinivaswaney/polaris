@@ -9,6 +9,7 @@ export default function SearchScreen() {
 
   return (
     <Screen
+      section="Search"
       style={[
         styles.container,
         { gap: theme.spacing(2), padding: theme.spacing(6) },

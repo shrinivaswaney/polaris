@@ -1,17 +1,39 @@
-import type { PropsWithChildren } from "react";
-import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import type { PropsWithChildren, ReactNode } from "react";
+import {
+  StyleSheet,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 
 import { useTheme } from "../../theme/ThemeProvider";
+import { AppHeader } from "./AppHeader";
 
 export type ScreenProps = PropsWithChildren<{
+  /** Small section marker rendered in the header. */
+  section?: string;
+  /** Show a back affordance in the header. */
+  showBack?: boolean;
+  onBack?: () => void;
+  headerLeft?: ReactNode;
+  headerRight?: ReactNode;
+  /** Applied to the content area below the header. */
   style?: StyleProp<ViewStyle>;
 }>;
 
 /**
- * Full-screen container that applies the active theme background.
+ * Full-screen shell: themed background, editorial header, and content.
  * Use this instead of a bare `View` at the root of each screen.
  */
-export function Screen({ children, style }: ScreenProps) {
+export function Screen({
+  children,
+  section,
+  showBack,
+  onBack,
+  headerLeft,
+  headerRight,
+  style,
+}: ScreenProps) {
   const { theme } = useTheme();
 
   return (
@@ -19,16 +41,25 @@ export function Screen({ children, style }: ScreenProps) {
       style={[
         styles.screen,
         { backgroundColor: theme.colors.background },
-        style,
       ]}
     >
-      {children}
+      <AppHeader
+        section={section}
+        showBack={showBack}
+        onBack={onBack}
+        left={headerLeft}
+        right={headerRight}
+      />
+      <View style={[styles.content, style]}>{children}</View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
+  },
+  content: {
     flex: 1,
   },
 });

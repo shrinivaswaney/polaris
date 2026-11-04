@@ -9,6 +9,7 @@ export default function ExploreScreen() {
 
   return (
     <Screen
+      section="Explore"
       style={[
         styles.container,
         { gap: theme.spacing(2), padding: theme.spacing(6) },

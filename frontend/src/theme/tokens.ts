@@ -17,6 +17,7 @@ const fontFamily = {
 const fontSize = {
   caption: 12,
   label: 11,
+  wordmark: 18,
   bodySmall: 14,
   body: 16,
   button: 16,
@@ -31,6 +32,7 @@ const fontSize = {
 const lineHeight = {
   caption: 16,
   label: 14,
+  wordmark: 22,
   bodySmall: 22,
   body: 26,
   button: 20,
@@ -47,6 +49,7 @@ const letterSpacing = {
   heading: -0.5,
   headingTight: -0.25,
   editorial: 1.6,
+  wordmark: 3,
 } as const;
 
 const fontWeight = {
@@ -59,7 +62,7 @@ const fontWeight = {
 /**
  * Ready-to-use text styles.
  *
- * Science Gothic  -> display, h1, h2, h3, quote
+ * Science Gothic  -> display, h1, h2, h3, quote, wordmark
  * Manrope         -> body, bodySmall, caption, label, button
  *
  * Science Gothic axes: CTRS 0–85, slnt -10–0, wdth 50–200, wght 100–900.
@@ -127,6 +130,14 @@ export const textStyles = {
     lineHeight: lineHeight.label,
     fontWeight: fontWeight.semibold,
     letterSpacing: letterSpacing.editorial,
+    textTransform: "uppercase",
+  },
+  wordmark: {
+    fontFamily: fontFamily.heading,
+    fontSize: fontSize.wordmark,
+    lineHeight: lineHeight.wordmark,
+    fontWeight: fontWeight.semibold,
+    letterSpacing: letterSpacing.wordmark,
     textTransform: "uppercase",
   },
   button: {

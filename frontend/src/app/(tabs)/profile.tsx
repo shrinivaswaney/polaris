@@ -9,6 +9,7 @@ export default function ProfileScreen() {
 
   return (
     <Screen
+      section="Profile"
       style={[
         styles.container,
         { gap: theme.spacing(2), padding: theme.spacing(6) },
