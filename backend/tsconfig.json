@@ -12,5 +12,5 @@
     "moduleDetection": "force",
     "skipLibCheck": true
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts", "src/db/db.js"]
 }
