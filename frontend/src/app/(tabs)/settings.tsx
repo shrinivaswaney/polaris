@@ -1,22 +1,20 @@
+import { AppText, Screen } from "@/components/shared/default";
+import { useTheme } from "@/theme/ThemeProvider";
 import { StyleSheet } from "react-native";
 
-import { AppText } from "../components/shared/AppText";
-import { Screen } from "../components/shared/Screen";
-import { useTheme } from "../theme/ThemeProvider";
-
-export default function SavedScreen() {
+export default function SettingsScreen() {
   const { theme } = useTheme();
 
   return (
     <Screen
-      title="Your Saved Items"
+      section="Settings"
       style={[
         styles.container,
         { gap: theme.spacing(2), padding: theme.spacing(6) },
       ]}
     >
-      <AppText variant="h2">Saved</AppText>
-      <AppText color="muted">Saved Screen</AppText>
+      <AppText variant="h2">Settings</AppText>
+      <AppText color="muted">Settings Screen</AppText>
     </Screen>
   );
 }

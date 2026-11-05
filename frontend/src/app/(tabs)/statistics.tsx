@@ -1,21 +1,20 @@
-import { AppText } from "@/components/shared/AppText";
-import { Screen } from "@/components/shared/Screen";
+import { AppText, Screen } from "@/components/shared/default";
 import { useTheme } from "@/theme/ThemeProvider";
 import { StyleSheet } from "react-native";
 
-export default function ProfileScreen() {
+export default function StatisticsScreen() {
   const { theme } = useTheme();
 
   return (
     <Screen
-      section="Profile"
+      section="Statistics"
       style={[
         styles.container,
         { gap: theme.spacing(2), padding: theme.spacing(6) },
       ]}
     >
-      <AppText variant="h2">Profile</AppText>
-      <AppText color="muted">Profile Screen</AppText>
+      <AppText variant="h2">Statistics</AppText>
+      <AppText color="muted">Statistics Screen</AppText>
     </Screen>
   );
 }

@@ -1,12 +1,11 @@
+import { useTheme } from "@/theme/ThemeProvider";
 import { Tabs } from "expo-router";
 import {
+  ChartBarIcon,
   CompassIcon,
-  MagnifyingGlassIcon,
-  UserIcon,
+  GearIcon,
+  ListChecksIcon,
 } from "phosphor-react-native";
-
-import { useTheme } from "../../theme/ThemeProvider";
-import { textStyles } from "../../theme/tokens";
 
 export default function TabsLayout() {
   const { theme } = useTheme();
@@ -15,13 +14,13 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarShowLabel: false,
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.muted,
         tabBarStyle: {
           backgroundColor: theme.colors.surfaceContainerLowest,
           borderTopColor: theme.colors.border,
         },
-        tabBarLabelStyle: textStyles.caption,
       }}
     >
       <Tabs.Screen
@@ -38,11 +37,11 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="list"
         options={{
-          title: "Search",
+          title: "Check List",
           tabBarIcon: ({ focused, size }) => (
-            <MagnifyingGlassIcon
+            <ListChecksIcon
               color={focused ? theme.colors.primary : theme.colors.muted}
               size={size}
               weight={focused ? "fill" : "regular"}
@@ -51,11 +50,24 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="statistics"
         options={{
-          title: "Profile",
+          title: "Statistics",
           tabBarIcon: ({ focused, size }) => (
-            <UserIcon
+            <ChartBarIcon
+              color={focused ? theme.colors.primary : theme.colors.muted}
+              size={size}
+              weight={focused ? "fill" : "regular"}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Settings",
+          tabBarIcon: ({ focused, size }) => (
+            <GearIcon
               color={focused ? theme.colors.primary : theme.colors.muted}
               size={size}
               weight={focused ? "fill" : "regular"}

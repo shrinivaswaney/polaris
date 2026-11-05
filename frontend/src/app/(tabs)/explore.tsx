@@ -1,6 +1,5 @@
 import { StyleSheet } from "react-native";
-import { AppText } from "../../components/shared/AppText";
-import { Screen } from "../../components/shared/Screen";
+import { AppText, Screen } from "@/components/shared/default";
 import { useTheme } from "../../theme/ThemeProvider";
 
 export default function ExploreScreen() {

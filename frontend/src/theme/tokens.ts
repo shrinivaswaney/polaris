@@ -182,18 +182,18 @@ const base = {
 
   components: {
     button: {
-      radius: 12,
+      radius: 0,
       paddingX: "1.4rem",
       paddingY: "1rem",
     },
 
     input: {
-      radius: 12,
+      radius: 0,
       borderStyle: "bottom-only" as const,
     },
 
     card: {
-      radius: 8,
+      radius: 0,
       shadow: "none",
     },
 
@@ -226,9 +226,11 @@ export interface AppTheme {
     surfaceContainerLow: string;
     surfaceContainer: string;
     surfaceContainerHigh: string;
+    surfaceContainerHighest: string;
 
     text: string;
     muted: string;
+    textDim: string;
 
     border: string;
     outlineVariant: string;
@@ -254,9 +256,11 @@ export const lightTheme: AppTheme = {
     surfaceContainerLow: "#F3F3F3",
     surfaceContainer: "#EEEEEE",
     surfaceContainerHigh: "#E5E5E5",
+    surfaceContainerHighest: "#DCDCDC",
 
     text: "#1B1B1B",
     muted: "#6B6B6B",
+    textDim: "#9A9A9A",
 
     border: "rgba(198, 198, 198, 0.15)",
     outlineVariant: "#C6C6C6",
@@ -278,24 +282,26 @@ export const darkTheme: AppTheme = {
 
   colors: {
     primary: "#FFFFFF",
-    onPrimary: "#1B1B1B",
+    onPrimary: "#0D0D0D",
 
-    background: "#121212",
-    surface: "#121212",
+    background: "#0D0D0D",
+    surface: "#131313",
     surfaceDim: "#080808",
 
-    surfaceContainerLowest: "#1C1C1C",
-    surfaceContainerLow: "#242424",
-    surfaceContainer: "#2A2A2A",
-    surfaceContainerHigh: "#333333",
+    surfaceContainerLowest: "#0E0E0E",
+    surfaceContainerLow: "#161616",
+    surfaceContainer: "#1F1F1F",
+    surfaceContainerHigh: "#282828",
+    surfaceContainerHighest: "#353534",
 
     text: "#F5F5F5",
-    muted: "#A3A3A3",
+    muted: "#8E8E93",
+    textDim: "#545458",
 
-    border: "rgba(255, 255, 255, 0.15)",
-    outlineVariant: "#666666",
+    border: "rgba(255, 255, 255, 0.08)",
+    outlineVariant: "#444748",
 
-    placeholder: "#333333",
+    placeholder: "#282828",
   },
 };
 
