@@ -1,8 +1,10 @@
+import icons from "@/assets/icons";
+
 export const userData = {
   id: "01a1a684-19c9-715c-9c19-00259bb90276",
   name: "Alex Mercer",
   email: "alex.mercer@example.com",
-  avatarUrl: "../../assets/mock-user/user.png",
+  avatarUrl: icons.user,
   role: "USER",
   passwordHash: null,
   emailVerifiedAt: "2026-10-28T08:30:00.000Z",
