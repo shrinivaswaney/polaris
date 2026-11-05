@@ -1,11 +1,6 @@
 import { useTheme } from "@/theme/ThemeProvider";
 import { Tabs } from "expo-router";
-import {
-  ChartBarIcon,
-  CompassIcon,
-  GearIcon,
-  ListChecksIcon,
-} from "phosphor-react-native";
+import { CompassIcon, GearIcon } from "phosphor-react-native";
 
 export default function TabsLayout() {
   const { theme } = useTheme();
@@ -24,37 +19,10 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="explore"
+        name="home"
         options={{
-          title: "Explore",
           tabBarIcon: ({ focused, size }) => (
             <CompassIcon
-              color={focused ? theme.colors.primary : theme.colors.muted}
-              size={size}
-              weight={focused ? "fill" : "regular"}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="list"
-        options={{
-          title: "Check List",
-          tabBarIcon: ({ focused, size }) => (
-            <ListChecksIcon
-              color={focused ? theme.colors.primary : theme.colors.muted}
-              size={size}
-              weight={focused ? "fill" : "regular"}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="statistics"
-        options={{
-          title: "Statistics",
-          tabBarIcon: ({ focused, size }) => (
-            <ChartBarIcon
               color={focused ? theme.colors.primary : theme.colors.muted}
               size={size}
               weight={focused ? "fill" : "regular"}
