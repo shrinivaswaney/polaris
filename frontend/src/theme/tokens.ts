@@ -59,15 +59,6 @@ const fontWeight = {
   bold: 700,
 } as const;
 
-/**
- * Ready-to-use text styles.
- *
- * Science Gothic  -> display, h1, h2, h3, quote, wordmark
- * Manrope         -> body, bodySmall, caption, label, button
- *
- * Science Gothic axes: CTRS 0–85, slnt -10–0, wdth 50–200, wght 100–900.
- * Add `fontVariationSettings` to a style to use an axis beyond weight/slant.
- */
 export const textStyles = {
   display: {
     fontFamily: fontFamily.heading,
@@ -102,8 +93,6 @@ export const textStyles = {
     lineHeight: lineHeight.quote,
     fontWeight: fontWeight.regular,
     fontStyle: "italic",
-    // Science Gothic's slnt axis runs from -10 to 0; this makes the italic
-    // consistent on Android and web as well as iOS.
     fontVariationSettings: "'slnt' -10",
   },
   body: {
@@ -270,12 +259,6 @@ export const lightTheme: AppTheme = {
 };
 
 /* -------------------- DARK THEME -------------------- */
-
-/*
-  Dark palette is an adapted interpretation of the
-  editorial design language. DESIGN.md specifies the
-  light palette but does not provide dark-mode values.
-*/
 
 export const darkTheme: AppTheme = {
   ...base,

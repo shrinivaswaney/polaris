@@ -1,9 +1,5 @@
 import type { FontFamilyDefinition } from "expo-font";
 
-/**
- * Font family names used throughout the app.
- * Keep these in sync with the aliases registered in `fontDefinitions`.
- */
 export const fontFamilies = {
   heading: "ScienceGothic",
   body: "Manrope",
@@ -16,13 +12,6 @@ export const fontWeight = {
   bold: 700,
 } as const;
 
-/**
- * Variable font files. A single file covers every weight, so headings and
- * body copy can use `fontWeight` without shipping one file per weight.
- *
- * Science Gothic also declares CTRS, slnt, and wdth axes. Use the
- * `fontVariationSettings` style prop (RN 0.88+) to reach those axes.
- */
 export const fontDefinitions: FontFamilyDefinition[] = [
   {
     fontFamily: fontFamilies.body,

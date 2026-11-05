@@ -1,3 +1,5 @@
+import { AppText } from "@/components/default";
+import { useTheme } from "@/theme/default";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -12,25 +14,19 @@ import {
   type ViewStyle,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "../../theme/ThemeProvider";
-import { AppText } from "./AppText";
+
+const imageLogoPath = require("@/assets/images/polaris-mark.png");
 
 export type AppHeaderProps = {
-  /** Small uppercase section marker shown on the right. */
   section?: string;
-  /** Nested page title. Replaces the wordmark with a back affordance and title. */
   title?: string;
-  /** Replace the wordmark with a back affordance. */
   showBack?: boolean;
   onBack?: () => void;
-  /** Replace the default left content. */
   left?: ReactNode;
-  /** Replace the default right content. */
   right?: ReactNode;
   style?: StyleProp<ViewStyle>;
 };
 
-/** Convert a #rrggbb token to #rrggbbaa without adding a dependency. */
 function withAlpha(color: string, opacity: number): string {
   const hex = color.replace("#", "");
 
@@ -45,13 +41,6 @@ function withAlpha(color: string, opacity: number): string {
   return `#${hex}${alpha}`;
 }
 
-/**
- * Editorial app header.
- *
- * Follows the design system's glass navigation rule: the surface-container
- * tone at 70% opacity over a 20px blur, with no hard border and square corners.
- * Safe-area padding is included, so it can sit at the top of any screen.
- */
 export function AppHeader({
   section,
   title,
@@ -67,7 +56,6 @@ export function AppHeader({
 
   const navigation = theme.components.navigation;
   const blur = Number.parseInt(navigation.blur, 10) || 20;
-  // expo-blur intensity is unitless on native; on web we blur with CSS instead.
   const intensity = Math.min(blur * 2.5, 100);
   const webBlur = `blur(${navigation.blur})`;
 
@@ -82,7 +70,6 @@ export function AppHeader({
       return;
     }
 
-    // Deep links have no history, so return to the app's root tab.
     router.replace("/(tabs)/explore");
   };
 
@@ -140,7 +127,7 @@ export function AppHeader({
               <Image
                 accessibilityIgnoresInvertColors
                 contentFit="contain"
-                source={require("../../../assets/images/polaris-mark.png")}
+                source={imageLogoPath}
                 style={styles.logo}
               />
               <AppText variant="wordmark">Polaris</AppText>

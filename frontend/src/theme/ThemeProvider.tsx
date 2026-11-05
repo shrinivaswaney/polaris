@@ -14,16 +14,11 @@ type ThemeContextValue = {
 };
 
 export type ThemeProviderProps = PropsWithChildren<{
-  /** Force a theme mode. Defaults to the system color scheme. */
   mode?: ThemeMode;
 }>;
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-/**
- * Provides the active theme (light/dark) to the whole app.
- * Wrap the app once, near the root layout.
- */
 export function ThemeProvider({
   children,
   mode: forcedMode,
@@ -39,7 +34,6 @@ export function ThemeProvider({
   );
 }
 
-/** Access the active theme tokens. Must be used inside a `ThemeProvider`. */
 export function useTheme(): ThemeContextValue {
   const value = useContext(ThemeContext);
 

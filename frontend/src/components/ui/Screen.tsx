@@ -1,26 +1,18 @@
+import { AppHeader } from "@/components/default";
+import { useTheme } from "@/theme/default";
 import type { PropsWithChildren, ReactNode } from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
-import { useTheme } from "../../theme/ThemeProvider";
-import { AppHeader } from "./AppHeader";
 
 export type ScreenProps = PropsWithChildren<{
-  /** Small section marker rendered in the header. */
   section?: string;
-  /** Nested page title; renders a back button instead of the wordmark. */
   title?: string;
-  /** Show a back affordance in the header. */
   showBack?: boolean;
   onBack?: () => void;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
-  /** Applied to the content area below the header. */
   style?: StyleProp<ViewStyle>;
 }>;
 
-/**
- * Full-screen shell: themed background, editorial header, and content.
- * Use this instead of a bare `View` at the root of each screen.
- */
 export function Screen({
   children,
   section,
