@@ -68,48 +68,65 @@ sessionRouter.post(
       const { refreshToken } = req.body;
       const targetHash = hashToken(refreshToken);
 
-      const sessionData = await prisma.$transaction(async (tx) => {
-        const storedToken = await tx.refreshToken.findUnique({
-          where: { tokenHash: targetHash },
-          include: { user: true },
-        });
-
-        if (storedToken && storedToken.revokedAt) {
-          // Breach protocol: Revoke all tokens belonging to this family instantly
-          await tx.refreshToken.updateMany({
-            where: { familyId: storedToken.familyId },
-            data: { revokedAt: new Date() },
+      const sessionData = await prisma.$transaction(
+        async (tx: {
+          refreshToken: {
+            findUnique: (arg0: {
+              where: { tokenHash: string };
+              include: { user: boolean };
+            }) => any;
+            updateMany: (arg0: {
+              where: { familyId: any };
+              data: { revokedAt: Date };
+            }) => any;
+            update: (arg0: {
+              where: { id: any };
+              data: { revokedAt: Date; lastUsedAt: Date };
+            }) => any;
+          };
+        }) => {
+          const storedToken = await tx.refreshToken.findUnique({
+            where: { tokenHash: targetHash },
+            include: { user: true },
           });
-          return "BREACH";
-        }
 
-        if (
-          !storedToken ||
-          storedToken.expiresAt < new Date() ||
-          !storedToken.user.isActive
-        ) {
-          return null;
-        }
+          if (storedToken && storedToken.revokedAt) {
+            // Breach protocol: Revoke all tokens belonging to this family instantly
+            await tx.refreshToken.updateMany({
+              where: { familyId: storedToken.familyId },
+              data: { revokedAt: new Date() },
+            });
+            return "BREACH";
+          }
 
-        // Mark the current token as used/revoked
-        await tx.refreshToken.update({
-          where: { id: storedToken.id },
-          data: {
-            revokedAt: new Date(),
-            lastUsedAt: new Date(),
-          },
-        });
+          if (
+            !storedToken ||
+            storedToken.expiresAt < new Date() ||
+            !storedToken.user.isActive
+          ) {
+            return null;
+          }
 
-        const tokens = await createSession(
-          storedToken.user.id,
-          storedToken.user.email,
-          storedToken.user.role,
-          tx,
-          storedToken.familyId,
-        );
+          // Mark the current token as used/revoked
+          await tx.refreshToken.update({
+            where: { id: storedToken.id },
+            data: {
+              revokedAt: new Date(),
+              lastUsedAt: new Date(),
+            },
+          });
 
-        return { tokens, user: storedToken.user };
-      });
+          const tokens = await createSession(
+            storedToken.user.id,
+            storedToken.user.email,
+            storedToken.user.role,
+            tx,
+            storedToken.familyId,
+          );
+
+          return { tokens, user: storedToken.user };
+        },
+      );
 
       if (sessionData === "BREACH" || !sessionData) {
         res

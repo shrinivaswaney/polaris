@@ -1,5 +1,6 @@
-import { AppText, Screen } from "@/components/default";
-import { useTheme } from "@/theme/default";
+import { AppText } from "@/components/shared/AppText";
+import { Screen } from "@/components/ui/Screen";
+import { useTheme } from "@/theme/ThemeProvider";
 import { StyleSheet } from "react-native";
 
 export default function HomeScreen() {

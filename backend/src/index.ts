@@ -4,6 +4,7 @@ import express from "express";
 import { prisma } from "./db/db.js";
 import authRouter from "./routes/auth.router.js";
 import sessionRouter from "./routes/session.router.js";
+import userRouter from "./routes/user.router.js";
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json({ limit: "1mb" }));
 
 app.use("/v1", authRouter);
 app.use("/v1", sessionRouter);
+app.use("/v1/settings", userRouter);
 
 // Liveness: is the process up?
 app.get("/health", (_req, res) => {

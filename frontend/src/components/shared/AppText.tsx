@@ -1,9 +1,5 @@
-import {
-  textStyles,
-  useTheme,
-  type AppTheme,
-  type TextVariant,
-} from "@/theme/default";
+import { useTheme } from "@/theme/ThemeProvider";
+import { textStyles, type AppTheme, type TextVariant } from "@/theme/tokens";
 import { Text, type TextProps } from "react-native";
 
 export type AppTextProps = TextProps & {

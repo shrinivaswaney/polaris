@@ -1,5 +1,5 @@
-import { AppText } from "@/components/default";
-import { useTheme } from "@/theme/default";
+import { AppText } from "@/components/shared/AppText";
+import { useTheme } from "@/theme/ThemeProvider";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -70,7 +70,7 @@ export function AppHeader({
       return;
     }
 
-    router.replace("/(tabs)/explore");
+    router.replace("/(tabs)/home");
   };
 
   const withBack = showBack || Boolean(title);

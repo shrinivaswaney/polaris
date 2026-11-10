@@ -1,7 +1,7 @@
-import { AppHeader } from "@/components/default";
-import { useTheme } from "@/theme/default";
+import { useTheme } from "@/theme/ThemeProvider";
 import type { PropsWithChildren, ReactNode } from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { AppHeader } from "./AppHeader";
 
 export type ScreenProps = PropsWithChildren<{
   section?: string;

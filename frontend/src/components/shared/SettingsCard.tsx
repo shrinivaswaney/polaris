@@ -1,5 +1,5 @@
-import { AppText } from "@/components/default";
 import { Avatar } from "@/components/sections/settings/Avatar";
+import { AppText } from "@/components/shared/AppText";
 import { CaretRightIcon, type Icon } from "phosphor-react-native";
 import { Pressable, StyleSheet, View } from "react-native";
 

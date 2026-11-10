@@ -99,6 +99,12 @@ enum MessageRole {
   ASSISTANT
 }
 
+enum AppTheme {
+  DARK
+  LIGHT
+  SYSTEM
+}
+
 // USERS & AUTH
 
 model User {
@@ -120,6 +126,7 @@ model User {
   locale      String  @default("en")
   timezone    String  @default("Asia/Kolkata")
   currency    String  @default("INR") @db.Char(3)
+  appTheme    AppTheme  @default(SYSTEM)
 
   isActive    Boolean   @default(true) @map("is_active")
   lastLoginAt DateTime? @map("last_login_at") @db.Timestamptz(6)

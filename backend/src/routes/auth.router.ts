@@ -19,9 +19,6 @@ import { createSession } from "./session.router.js";
 
 const authRouter = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_EXPIRES_IN = 3600; // 1 hour in seconds
-
 authRouter.post(
   "/signup",
   validate(SignupRequestSchema),
@@ -56,6 +53,7 @@ authRouter.post(
             role: "USER",
             plan: "FREE",
             isActive: true,
+            appTheme: "SYSTEM"
           },
         });
 
